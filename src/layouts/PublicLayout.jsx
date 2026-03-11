@@ -72,38 +72,38 @@ function BackgroundCanvas() {
 
     // Aurora wave config
     const auroraWaves = [
-      { color: "#14b8a6", offset: 0,   speed: 0.0008, amp: 80,  base: 0.82 },
-      { color: "#6366f1", offset: 2,   speed: 0.0006, amp: 60,  base: 0.88 },
-      { color: "#a855f7", offset: 4,   speed: 0.0010, amp: 70,  base: 0.78 },
-      { color: "#ec4899", offset: 6,   speed: 0.0007, amp: 50,  base: 0.93 },
-    ];
+  { color: "#14b8a6", offset: 0, speed: 0.0001, amp: 80,  base: 0.82 },
+  { color: "#6366f1", offset: 2, speed: 0.00008, amp: 60, base: 0.88 },
+  { color: "#a855f7", offset: 4, speed: 0.00012, amp: 70, base: 0.78 },
+  { color: "#ec4899", offset: 6, speed: 0.00009, amp: 50, base: 0.93 },
+];
 
     let t = 0;
 
     function drawAurora() {
-      auroraWaves.forEach((wave) => {
-        ctx.beginPath();
-        ctx.moveTo(0, H);
+  auroraWaves.forEach((wave) => {
+    ctx.beginPath();
+    ctx.moveTo(0, H);
 
-        for (let x = 0; x <= W; x += 6) {
-          const y =
-            H * wave.base +
-            Math.sin((x / W) * Math.PI * 3 + t * wave.speed * 1000 + wave.offset) * wave.amp +
-            Math.sin((x / W) * Math.PI * 5 + t * wave.speed * 800 + wave.offset * 1.5) * (wave.amp * 0.4);
-          ctx.lineTo(x, y);
-        }
-
-        ctx.lineTo(W, H);
-        ctx.closePath();
-
-        const grad = ctx.createLinearGradient(0, H * wave.base - wave.amp, 0, H);
-        grad.addColorStop(0, wave.color + "00");
-        grad.addColorStop(0.4, wave.color + "28");
-        grad.addColorStop(1, wave.color + "00");
-        ctx.fillStyle = grad;
-        ctx.fill();
-      });
+    for (let x = 0; x <= W; x += 6) {
+      const y =
+        H * wave.base +
+        Math.sin((x / W) * Math.PI * 3 + t * wave.speed + wave.offset) * wave.amp +
+        Math.sin((x / W) * Math.PI * 5 + t * wave.speed * 0.7 + wave.offset * 1.5) * (wave.amp * 0.4);
+      ctx.lineTo(x, y);
     }
+
+    ctx.lineTo(W, H);
+    ctx.closePath();
+
+    const grad = ctx.createLinearGradient(0, H * wave.base - wave.amp, 0, H);
+    grad.addColorStop(0, wave.color + "00");
+    grad.addColorStop(0.4, wave.color + "28");
+    grad.addColorStop(1, wave.color + "00");
+    ctx.fillStyle = grad;
+    ctx.fill();
+  });
+}
 
     function drawStars() {
       stars.forEach((s, i) => {
