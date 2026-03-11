@@ -65,7 +65,7 @@ function DisplayProject({ project }) {
                         <img
                           src={g}
                           alt={`Screenshot ${idx + 1}`}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full "
                           onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMG)}
                         />
                       </div>
