@@ -107,36 +107,36 @@ function DisplayProject({ project }) {
           )}
 
           {/* Tech Stack */}
-          {tech.length > 0 && (
-            <div className="flex flex-col gap-3">
-              <p className="text-xs font-mono tracking-[3px] text-primary/50 uppercase">
-                Tech Stack
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {tech.map((t) => (
-                  <div
-                    key={t._id}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm font-medium transition-all hover:scale-105"
-                    style={{
-                      backgroundColor: t.color ? `${t.color}18` : "transparent",
-                      borderColor: t.color ? `${t.color}40` : undefined,
-                      color: t.color || "inherit",
-                    }}
-                  >
-                    {t.icon && (
-                      <img
-                        src={t.icon}
-                        alt={t.name}
-                        className="w-4 h-4 object-contain"
-                        onError={(e) => (e.currentTarget.style.display = "none")}
-                      />
-                    )}
-                    <span>{t.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+{tech.length > 0 && (
+  <div className="flex flex-col gap-3">
+    <p className="text-xs font-mono tracking-[3px] text-primary/50 uppercase">
+      Tech Stack
+    </p>
+    <div className="flex flex-wrap gap-2">
+      {tech.map((t) => (
+        <div
+          key={t._id}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all hover:scale-105"
+          style={{
+            backgroundColor: t.color ? `${t.color}33` : "rgba(255,255,255,0.08)",
+            border: `1.5px solid ${t.color ? `${t.color}99` : "rgba(255,255,255,0.15)"}`,
+            color: t.color || "inherit",
+          }}
+        >
+          {t.icon && (
+            <img
+              src={t.icon}
+              alt={t.name}
+              className="w-4 h-4 object-contain"
+              onError={(e) => (e.currentTarget.style.display = "none")}
+            />
           )}
+          <span>{t.name}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 
           {/* Dates + Links */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-4 border-t border-border">
