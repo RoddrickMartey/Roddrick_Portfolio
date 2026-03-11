@@ -4,7 +4,7 @@ import Loading from "@/components/Loading";
 import Error from "@/components/Error";
 import { Button } from "@/components/ui/button";
 import { Laptop, FolderOpen, AlertTriangle } from "lucide-react";
-import DIsplayProject from "@/components/DIsplayProject";
+import DisplayProject from "@/components/DIsplayProject";
 import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
@@ -62,7 +62,7 @@ function ProjectCard({ project, index }) {
               Edit
             </Button>
           )}
-          <DIsplayProject project={project} />
+          <DisplayProject project={project} />
         </div>
       </div>
     </motion.div>
