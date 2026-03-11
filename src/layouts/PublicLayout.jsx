@@ -18,12 +18,13 @@ export default function PublicLayout() {
   }
 
   return (
-    <div className="relative min-h-screen bg-background overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden">
 
       {/* Grid */}
       <div
-        className="pointer-events-none fixed inset-0 -z-10"
+        className="pointer-events-none fixed inset-0"
         style={{
+          zIndex: 0,
           backgroundImage: `
             linear-gradient(rgba(20, 184, 166, 0.15) 1px, transparent 1px),
             linear-gradient(90deg, rgba(20, 184, 166, 0.15) 1px, transparent 1px)
@@ -33,7 +34,7 @@ export default function PublicLayout() {
       />
 
       {/* Orbs */}
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+      <div className="pointer-events-none fixed inset-0 overflow-hidden" style={{ zIndex: 0 }}>
         <div
           style={{
             position: "absolute",
@@ -41,7 +42,7 @@ export default function PublicLayout() {
             height: "500px",
             borderRadius: "50%",
             background: "#14b8a6",
-            opacity: 0.4,
+            opacity: 0.5,
             filter: "blur(40px)",
             top: "-100px",
             left: "-100px",
@@ -55,7 +56,7 @@ export default function PublicLayout() {
             height: "450px",
             borderRadius: "50%",
             background: "#6366f1",
-            opacity: 0.4,
+            opacity: 0.5,
             filter: "blur(40px)",
             bottom: "-100px",
             right: "-100px",
@@ -69,7 +70,7 @@ export default function PublicLayout() {
             height: "350px",
             borderRadius: "50%",
             background: "#f59e0b",
-            opacity: 0.35,
+            opacity: 0.45,
             filter: "blur(35px)",
             top: "40%",
             left: "40%",
@@ -93,8 +94,12 @@ export default function PublicLayout() {
         }
       `}</style>
 
-      <Header />
-      <Outlet />
+      {/* Content sits above orbs */}
+      <div className="relative" style={{ zIndex: 1 }}>
+        <Header />
+        <Outlet />
+      </div>
+
     </div>
   );
 }
