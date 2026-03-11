@@ -96,32 +96,34 @@ function ContactPage() {
             Direct
           </p>
           {contactItems.map((item, i) => (
-            <motion.div
-              key={i}
-              whileHover={{ x: 4 }}
-              transition={{ duration: 0.2 }}
-              className="group flex items-center gap-4 p-4 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 hover:border-primary/30 transition-all duration-200"
-            >
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary flex-shrink-0">
-                {item.icon}
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-mono text-muted-foreground/50 tracking-widest uppercase">
-                  {item.label}
-                </span>
-                {item.href ? (
-                  
-                    href={item.href}
-                    className="text-sm font-medium text-foreground hover:text-primary transition-colors"
-                  >
-                    {item.value}
-                  </a>
-                ) : (
-                  <span className="text-sm font-medium text-foreground">{item.value}</span>
-                )}
-              </div>
-            </motion.div>
-          ))}
+  <motion.div
+    key={i}
+    whileHover={{ x: 4 }}
+    transition={{ duration: 0.2 }}
+    className="group flex items-center gap-4 p-4 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 hover:border-primary/30 transition-all duration-200"
+  >
+    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary flex-shrink-0">
+      {item.icon}
+    </div>
+    <div className="flex flex-col">
+      <span className="text-xs font-mono text-muted-foreground/50 tracking-widest uppercase">
+        {item.label}
+      </span>
+      {item.href ? (
+        
+          href={item.href}
+          className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+        >
+          {item.value}
+        </a>
+      ) : (
+        <span className="text-sm font-medium text-foreground">
+          {item.value}
+        </span>
+      )}
+    </div>
+  </motion.div>
+))}
         </motion.div>
 
         {/* Socials */}
