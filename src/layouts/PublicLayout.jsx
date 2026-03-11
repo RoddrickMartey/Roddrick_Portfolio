@@ -18,7 +18,7 @@ function BackgroundCanvas() {
     const COLORS = ["#14b8a6", "#6366f1", "#a855f7", "#f59e0b", "#ec4899"];
 
     // -- STARS / CONSTELLATION --
-    const STAR_COUNT = 80;
+    const STAR_COUNT = 60;
     const stars = [];
 
     // -- PARTICLES --
@@ -35,19 +35,21 @@ function BackgroundCanvas() {
     }
 
     function initStars() {
-      stars.length = 0;
-      for (let i = 0; i < STAR_COUNT; i++) {
-        stars.push({
-          x: Math.random() * W,
-          y: Math.random() * H,
-          vx: (Math.random() - 0.5) * 0.3,
-          vy: (Math.random() - 0.5) * 0.3,
-          r: Math.random() * 1.5 + 0.5,
-          color: randomColor(),
-          alpha: Math.random() * 0.5 + 0.3,
-        });
-      }
-    }
+  stars.length = 0;
+  for (let i = 0; i < STAR_COUNT; i++) {
+    stars.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.25,
+      vy: (Math.random() - 0.5) * 0.25,
+      r: Math.random() * 2.5 + 1.5,        // bigger dots: 1.5 - 4px
+      color: randomColor(),
+      alpha: Math.random() * 0.4 + 0.6,    // more opaque: 0.6 - 1.0
+      pulseOffset: Math.random() * Math.PI * 2,
+      pulseSpeed: Math.random() * 0.02 + 0.01,
+    });
+  }
+}
 
     function initParticles() {
       particles.length = 0;
@@ -80,28 +82,68 @@ function BackgroundCanvas() {
 
     let t = 0;
 
-    function drawAurora() {
-  auroraWaves.forEach((wave) => {
-    ctx.beginPath();
-    ctx.moveTo(0, H);
+   function drawStars() {
+  stars.forEach((s, i) => {
+    s.x += s.vx;
+    s.y += s.vy;
+    if (s.x < 0) s.x = W;
+    if (s.x > W) s.x = 0;
+    if (s.y < 0) s.y = H;
+    if (s.y > H) s.y = 0;
 
-    for (let x = 0; x <= W; x += 6) {
-      const y =
-        H * wave.base +
-        Math.sin((x / W) * Math.PI * 3 + t * wave.speed + wave.offset) * wave.amp +
-        Math.sin((x / W) * Math.PI * 5 + t * wave.speed * 0.7 + wave.offset * 1.5) * (wave.amp * 0.4);
-      ctx.lineTo(x, y);
+    // Pulse the size gently
+    const pulse = Math.sin(t * s.pulseSpeed + s.pulseOffset) * 0.5 + 1;
+    const r = s.r * pulse;
+
+    // Outer glow ring
+    const glow = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, r * 5);
+    glow.addColorStop(0, s.color + "66");
+    glow.addColorStop(1, s.color + "00");
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, r * 5, 0, Math.PI * 2);
+    ctx.fillStyle = glow;
+    ctx.fill();
+
+    // Solid core dot
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, r, 0, Math.PI * 2);
+    ctx.fillStyle = s.color + Math.round(s.alpha * 255).toString(16).padStart(2, "0");
+    ctx.fill();
+
+    // Cross sparkle on bigger stars
+    if (s.r > 2.5) {
+      ctx.save();
+      ctx.globalAlpha = s.alpha * 0.5;
+      ctx.strokeStyle = s.color;
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(s.x - r * 3, s.y);
+      ctx.lineTo(s.x + r * 3, s.y);
+      ctx.moveTo(s.x, s.y - r * 3);
+      ctx.lineTo(s.x, s.y + r * 3);
+      ctx.stroke();
+      ctx.restore();
     }
 
-    ctx.lineTo(W, H);
-    ctx.closePath();
-
-    const grad = ctx.createLinearGradient(0, H * wave.base - wave.amp, 0, H);
-    grad.addColorStop(0, wave.color + "00");
-    grad.addColorStop(0.4, wave.color + "28");
-    grad.addColorStop(1, wave.color + "00");
-    ctx.fillStyle = grad;
-    ctx.fill();
+    // Connections
+    for (let j = i + 1; j < stars.length; j++) {
+      const b = stars[j];
+      const dx = s.x - b.x;
+      const dy = s.y - b.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 150) {
+        const lineAlpha = (1 - dist / 150) * 0.35;
+        const grad = ctx.createLinearGradient(s.x, s.y, b.x, b.y);
+        grad.addColorStop(0, s.color + Math.round(lineAlpha * 255).toString(16).padStart(2, "0"));
+        grad.addColorStop(1, b.color + Math.round(lineAlpha * 255).toString(16).padStart(2, "00"));
+        ctx.beginPath();
+        ctx.moveTo(s.x, s.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
   });
 }
 
