@@ -14,6 +14,7 @@ function BackgroundCanvas() {
     const ctx = canvas.getContext("2d");
     let animId;
     let W, H;
+    let t = 0;
 
     const COLORS = ["#14b8a6", "#6366f1", "#a855f7", "#f59e0b", "#ec4899"];
 
@@ -21,8 +22,6 @@ function BackgroundCanvas() {
     const stars = [];
     const PARTICLE_COUNT = 40;
     const particles = [];
-
-    // Ink blobs
     const BLOB_COUNT = 5;
     const blobs = [];
 
@@ -44,9 +43,8 @@ function BackgroundCanvas() {
           y: Math.random() * H,
           vx: (Math.random() - 0.5) * 0.15,
           vy: (Math.random() - 0.5) * 0.15,
-          baseR: Math.random() * 180 + 120,   // 120–300px
+          baseR: Math.random() * 180 + 120,
           color: randomColor(),
-          // Each blob has 8 radii that morph independently
           radii: Array.from({ length: 8 }, () => Math.random() * 0.4 + 0.8),
           radiusSpeeds: Array.from({ length: 8 }, () => (Math.random() - 0.5) * 0.003),
           rotation: Math.random() * Math.PI * 2,
@@ -57,7 +55,6 @@ function BackgroundCanvas() {
 
     function drawBlobs() {
       blobs.forEach((b) => {
-        // Drift
         b.x += b.vx;
         b.y += b.vy;
         if (b.x < -b.baseR) b.x = W + b.baseR;
@@ -65,7 +62,6 @@ function BackgroundCanvas() {
         if (b.y < -b.baseR) b.y = H + b.baseR;
         if (b.y > H + b.baseR) b.y = -b.baseR;
 
-        // Morph radii
         b.radii = b.radii.map((r, i) => {
           let next = r + b.radiusSpeeds[i];
           if (next > 1.4 || next < 0.6) b.radiusSpeeds[i] *= -1;
@@ -73,7 +69,6 @@ function BackgroundCanvas() {
         });
         b.rotation += b.rotSpeed;
 
-        // Draw organic blob shape using bezier curves
         const points = b.radii.length;
         const angleStep = (Math.PI * 2) / points;
 
@@ -93,7 +88,6 @@ function BackgroundCanvas() {
           const x2 = Math.cos(nextAngle) * r2;
           const y2 = Math.sin(nextAngle) * r2;
 
-          // Control point for smooth curve
           const cpAngle = angle + angleStep / 2;
           const cpR = b.baseR * ((b.radii[i] + b.radii[(i + 1) % points]) / 2) * 1.15;
           const cpX = Math.cos(cpAngle) * cpR;
@@ -104,7 +98,6 @@ function BackgroundCanvas() {
         }
         ctx.closePath();
 
-        // Ink-style radial gradient — dark center fading out
         const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, b.baseR * 1.2);
         grad.addColorStop(0, b.color + "22");
         grad.addColorStop(0.5, b.color + "12");
@@ -112,7 +105,6 @@ function BackgroundCanvas() {
         ctx.fillStyle = grad;
         ctx.fill();
 
-        // Soft ink edge stroke
         ctx.strokeStyle = b.color + "18";
         ctx.lineWidth = 2;
         ctx.stroke();
@@ -132,9 +124,9 @@ function BackgroundCanvas() {
           vy: (Math.random() - 0.5) * 0.25,
           r: Math.random() * 2.5 + 1.5,
           color: randomColor(),
-          alpha: Math.random() * 0.3 + 0.7,   // steady, no big pulse swing
+          alpha: Math.random() * 0.3 + 0.7,
           pulseOffset: Math.random() * Math.PI * 2,
-          pulseSpeed: Math.random() * 0.004 + 0.001, // very slow pulse
+          pulseSpeed: Math.random() * 0.004 + 0.001,
         });
       }
     }
@@ -148,7 +140,6 @@ function BackgroundCanvas() {
         if (s.y < 0) s.y = H;
         if (s.y > H) s.y = 0;
 
-        // Very subtle pulse — barely noticeable
         const pulse = Math.sin(t * s.pulseSpeed + s.pulseOffset) * 0.15 + 1;
         const r = s.r * pulse;
 
