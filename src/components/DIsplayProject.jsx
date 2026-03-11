@@ -2,9 +2,6 @@ import React from "react";
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
@@ -33,62 +30,63 @@ function DisplayProject({ project }) {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="w-full max-w-5xl max-h-[90vh] overflow-y-auto p-0 gap-0 rounded-2xl border border-border bg-background">
-
-        {/* Hero image */}
-        <div className="relative w-full aspect-video overflow-hidden rounded-t-2xl bg-muted">
-          <img
-            src={gallery[0]}
-            alt={project.title}
-            className="w-full h-full object-cover"
-            onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMG)}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-          <div className="absolute bottom-0 left-0 p-6">
-            <p className="text-xs font-mono tracking-[3px] text-primary/70 uppercase mb-1">
-              Project
-            </p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white leading-tight drop-shadow">
-              {project.title}
-            </h2>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-8 p-6 sm:p-8">
-
-          {/* Summary */}
+      <DialogContent
+        style={{ maxWidth: "900px", width: "90vw" }}
+        className="max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-background p-6 sm:p-8"
+      >
+        {/* Header */}
+        <div className="flex flex-col gap-1 mb-4">
+          <p className="text-xs font-mono tracking-[3px] text-primary/50 uppercase">
+            Project
+          </p>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            {project.title}
+          </h2>
           {project.summary && (
-            <p className="text-base font-light leading-relaxed text-muted-foreground">
+            <p className="text-base font-light leading-relaxed text-muted-foreground mt-1">
               {project.summary}
             </p>
           )}
+        </div>
 
-          {/* Gallery carousel */}
+        <div className="flex flex-col gap-8">
+
+          {/* Gallery */}
           {gallery.length > 1 && (
             <div className="flex flex-col gap-3">
               <p className="text-xs font-mono tracking-[3px] text-primary/50 uppercase">
                 Gallery
               </p>
-              <div className="flex items-center justify-center">
-                <Carousel className="w-full">
-                  <CarouselContent>
-                    {gallery.map((g, idx) => (
-                      <CarouselItem key={idx}>
-                        <div className="overflow-hidden rounded-xl border border-border aspect-video">
-                          <img
-                            src={g}
-                            alt={`Screenshot ${idx + 1}`}
-                            className="w-full h-full object-cover"
-                            onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMG)}
-                          />
-                        </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious className="left-2" />
-                  <CarouselNext className="right-2" />
-                </Carousel>
-              </div>
+              <Carousel className="w-full">
+                <CarouselContent>
+                  {gallery.map((g, idx) => (
+                    <CarouselItem key={idx}>
+                      <div className="overflow-hidden rounded-xl border border-border aspect-video">
+                        <img
+                          src={g}
+                          alt={`Screenshot ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMG)}
+                        />
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
+            </div>
+          )}
+
+          {/* Single image */}
+          {gallery.length === 1 && (
+            <div className="overflow-hidden rounded-xl border border-border aspect-video">
+              <img
+                src={gallery[0]}
+                alt={project.title}
+                className="w-full h-full object-cover"
+                onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMG)}
+              />
             </div>
           )}
 
