@@ -20,72 +20,84 @@ export default function PublicLayout() {
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
 
-      {/* Animated grid background */}
+      {/* Grid */}
       <div
         className="pointer-events-none fixed inset-0 -z-10"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(20, 184, 166, 0.07) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(20, 184, 166, 0.07) 1px, transparent 1px)
+            linear-gradient(rgba(20, 184, 166, 0.15) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(20, 184, 166, 0.15) 1px, transparent 1px)
           `,
           backgroundSize: "48px 48px",
         }}
       />
 
-      {/* Animated gradient orbs */}
+      {/* Orbs */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        {/* Teal — top left */}
         <div
-          className="absolute w-[600px] h-[600px] rounded-full opacity-20 blur-[100px]"
           style={{
-            background: "radial-gradient(circle, #14b8a6 0%, transparent 70%)",
-            top: "-10%",
-            left: "-10%",
-            animation: "drift1 18s ease-in-out infinite alternate",
+            position: "absolute",
+            width: "500px",
+            height: "500px",
+            borderRadius: "50%",
+            background: "#14b8a6",
+            opacity: 0.25,
+            filter: "blur(60px)",
+            top: "-100px",
+            left: "-100px",
+            animation: "drift1 8s ease-in-out infinite alternate",
           }}
         />
-        {/* Indigo — bottom right */}
         <div
-          className="absolute w-[500px] h-[500px] rounded-full opacity-15 blur-[90px]"
           style={{
-            background: "radial-gradient(circle, #6366f1 0%, transparent 70%)",
-            bottom: "-10%",
-            right: "-10%",
-            animation: "drift2 22s ease-in-out infinite alternate",
+            position: "absolute",
+            width: "450px",
+            height: "450px",
+            borderRadius: "50%",
+            background: "#6366f1",
+            opacity: 0.25,
+            filter: "blur(60px)",
+            bottom: "-100px",
+            right: "-100px",
+            animation: "drift2 10s ease-in-out infinite alternate",
           }}
         />
-        {/* Amber — center */}
         <div
-          className="absolute w-[400px] h-[400px] rounded-full opacity-10 blur-[80px]"
           style={{
-            background: "radial-gradient(circle, #f59e0b 0%, transparent 70%)",
+            position: "absolute",
+            width: "350px",
+            height: "350px",
+            borderRadius: "50%",
+            background: "#f59e0b",
+            opacity: 0.2,
+            filter: "blur(50px)",
             top: "40%",
-            left: "50%",
-            animation: "drift3 26s ease-in-out infinite alternate",
+            left: "40%",
+            animation: "drift3 12s ease-in-out infinite alternate",
           }}
         />
       </div>
 
-      {/* Vignette edges */}
+      {/* Vignette */}
       <div
         className="pointer-events-none fixed inset-0 -z-10"
         style={{
-          background: "radial-gradient(ellipse at center, transparent 60%, hsl(var(--background)) 100%)",
+          background: "radial-gradient(ellipse at center, transparent 50%, hsl(var(--background)) 90%)",
         }}
       />
 
       <style>{`
         @keyframes drift1 {
-          from { transform: translate(0px, 0px) scale(1); }
-          to   { transform: translate(60px, 80px) scale(1.15); }
+          0%   { transform: translate(0px, 0px) scale(1); }
+          100% { transform: translate(80px, 100px) scale(1.2); }
         }
         @keyframes drift2 {
-          from { transform: translate(0px, 0px) scale(1); }
-          to   { transform: translate(-80px, -60px) scale(1.2); }
+          0%   { transform: translate(0px, 0px) scale(1); }
+          100% { transform: translate(-80px, -100px) scale(1.2); }
         }
         @keyframes drift3 {
-          from { transform: translate(0px, 0px) scale(1); }
-          to   { transform: translate(-50px, 70px) scale(1.1); }
+          0%   { transform: translate(0px, 0px) scale(1); }
+          100% { transform: translate(-60px, 80px) scale(1.15); }
         }
       `}</style>
 
