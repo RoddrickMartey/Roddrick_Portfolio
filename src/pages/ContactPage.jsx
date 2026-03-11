@@ -107,9 +107,10 @@ function ContactPage() {
                 <span className="text-xs font-mono text-muted-foreground/50 tracking-widest uppercase">
                   {item.label}
                 </span>
+                <a
                 {item.href ? (
                   
-                    href={item.href}
+                    href={item.href})}
                     className="text-sm font-medium text-foreground hover:text-primary transition-colors"
                   >
                     {item.value}
