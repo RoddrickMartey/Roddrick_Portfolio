@@ -41,11 +41,11 @@ export default function PublicLayout() {
             height: "500px",
             borderRadius: "50%",
             background: "#14b8a6",
-            opacity: 0.25,
-            filter: "blur(60px)",
+            opacity: 0.4,
+            filter: "blur(40px)",
             top: "-100px",
             left: "-100px",
-            animation: "drift1 8s ease-in-out infinite alternate",
+            animation: "drift1 6s ease-in-out infinite alternate",
           }}
         />
         <div
@@ -55,11 +55,11 @@ export default function PublicLayout() {
             height: "450px",
             borderRadius: "50%",
             background: "#6366f1",
-            opacity: 0.25,
-            filter: "blur(60px)",
+            opacity: 0.4,
+            filter: "blur(40px)",
             bottom: "-100px",
             right: "-100px",
-            animation: "drift2 10s ease-in-out infinite alternate",
+            animation: "drift2 8s ease-in-out infinite alternate",
           }}
         />
         <div
@@ -69,22 +69,14 @@ export default function PublicLayout() {
             height: "350px",
             borderRadius: "50%",
             background: "#f59e0b",
-            opacity: 0.2,
-            filter: "blur(50px)",
+            opacity: 0.35,
+            filter: "blur(35px)",
             top: "40%",
             left: "40%",
-            animation: "drift3 12s ease-in-out infinite alternate",
+            animation: "drift3 10s ease-in-out infinite alternate",
           }}
         />
       </div>
-
-      {/* Vignette */}
-      <div
-        className="pointer-events-none fixed inset-0 -z-10"
-        style={{
-          background: "radial-gradient(ellipse at center, transparent 50%, hsl(var(--background)) 90%)",
-        }}
-      />
 
       <style>{`
         @keyframes drift1 {
