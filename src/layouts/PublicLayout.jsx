@@ -19,9 +19,12 @@ function BackgroundCanvas() {
 
     const STAR_COUNT = 60;
     const stars = [];
-
     const PARTICLE_COUNT = 40;
     const particles = [];
+
+    // Ink blobs
+    const BLOB_COUNT = 5;
+    const blobs = [];
 
     function resize() {
       W = canvas.width = window.innerWidth;
@@ -32,6 +35,93 @@ function BackgroundCanvas() {
       return COLORS[Math.floor(Math.random() * COLORS.length)];
     }
 
+    // ── INK BLOBS ──
+    function initBlobs() {
+      blobs.length = 0;
+      for (let i = 0; i < BLOB_COUNT; i++) {
+        blobs.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 0.15,
+          vy: (Math.random() - 0.5) * 0.15,
+          baseR: Math.random() * 180 + 120,   // 120–300px
+          color: randomColor(),
+          // Each blob has 8 radii that morph independently
+          radii: Array.from({ length: 8 }, () => Math.random() * 0.4 + 0.8),
+          radiusSpeeds: Array.from({ length: 8 }, () => (Math.random() - 0.5) * 0.003),
+          rotation: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 0.001,
+        });
+      }
+    }
+
+    function drawBlobs() {
+      blobs.forEach((b) => {
+        // Drift
+        b.x += b.vx;
+        b.y += b.vy;
+        if (b.x < -b.baseR) b.x = W + b.baseR;
+        if (b.x > W + b.baseR) b.x = -b.baseR;
+        if (b.y < -b.baseR) b.y = H + b.baseR;
+        if (b.y > H + b.baseR) b.y = -b.baseR;
+
+        // Morph radii
+        b.radii = b.radii.map((r, i) => {
+          let next = r + b.radiusSpeeds[i];
+          if (next > 1.4 || next < 0.6) b.radiusSpeeds[i] *= -1;
+          return next;
+        });
+        b.rotation += b.rotSpeed;
+
+        // Draw organic blob shape using bezier curves
+        const points = b.radii.length;
+        const angleStep = (Math.PI * 2) / points;
+
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        ctx.rotate(b.rotation);
+
+        ctx.beginPath();
+        for (let i = 0; i < points; i++) {
+          const angle = i * angleStep;
+          const nextAngle = ((i + 1) % points) * angleStep;
+          const r1 = b.baseR * b.radii[i];
+          const r2 = b.baseR * b.radii[(i + 1) % points];
+
+          const x1 = Math.cos(angle) * r1;
+          const y1 = Math.sin(angle) * r1;
+          const x2 = Math.cos(nextAngle) * r2;
+          const y2 = Math.sin(nextAngle) * r2;
+
+          // Control point for smooth curve
+          const cpAngle = angle + angleStep / 2;
+          const cpR = b.baseR * ((b.radii[i] + b.radii[(i + 1) % points]) / 2) * 1.15;
+          const cpX = Math.cos(cpAngle) * cpR;
+          const cpY = Math.sin(cpAngle) * cpR;
+
+          if (i === 0) ctx.moveTo(x1, y1);
+          ctx.quadraticCurveTo(cpX, cpY, x2, y2);
+        }
+        ctx.closePath();
+
+        // Ink-style radial gradient — dark center fading out
+        const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, b.baseR * 1.2);
+        grad.addColorStop(0, b.color + "22");
+        grad.addColorStop(0.5, b.color + "12");
+        grad.addColorStop(1, b.color + "00");
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // Soft ink edge stroke
+        ctx.strokeStyle = b.color + "18";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.restore();
+      });
+    }
+
+    // ── STARS ──
     function initStars() {
       stars.length = 0;
       for (let i = 0; i < STAR_COUNT; i++) {
@@ -42,13 +132,79 @@ function BackgroundCanvas() {
           vy: (Math.random() - 0.5) * 0.25,
           r: Math.random() * 2.5 + 1.5,
           color: randomColor(),
-          alpha: Math.random() * 0.4 + 0.6,
+          alpha: Math.random() * 0.3 + 0.7,   // steady, no big pulse swing
           pulseOffset: Math.random() * Math.PI * 2,
-          pulseSpeed: Math.random() * 0.02 + 0.01,
+          pulseSpeed: Math.random() * 0.004 + 0.001, // very slow pulse
         });
       }
     }
 
+    function drawStars() {
+      stars.forEach((s, i) => {
+        s.x += s.vx;
+        s.y += s.vy;
+        if (s.x < 0) s.x = W;
+        if (s.x > W) s.x = 0;
+        if (s.y < 0) s.y = H;
+        if (s.y > H) s.y = 0;
+
+        // Very subtle pulse — barely noticeable
+        const pulse = Math.sin(t * s.pulseSpeed + s.pulseOffset) * 0.15 + 1;
+        const r = s.r * pulse;
+
+        // Soft glow
+        const glow = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, r * 4);
+        glow.addColorStop(0, s.color + "55");
+        glow.addColorStop(1, s.color + "00");
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, r * 4, 0, Math.PI * 2);
+        ctx.fillStyle = glow;
+        ctx.fill();
+
+        // Core
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = s.color + Math.round(s.alpha * 255).toString(16).padStart(2, "0");
+        ctx.fill();
+
+        // Cross sparkle only on largest stars
+        if (s.r > 3.2) {
+          ctx.save();
+          ctx.globalAlpha = s.alpha * 0.4;
+          ctx.strokeStyle = s.color;
+          ctx.lineWidth = 0.6;
+          ctx.beginPath();
+          ctx.moveTo(s.x - r * 3, s.y);
+          ctx.lineTo(s.x + r * 3, s.y);
+          ctx.moveTo(s.x, s.y - r * 3);
+          ctx.lineTo(s.x, s.y + r * 3);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // Constellation lines
+        for (let j = i + 1; j < stars.length; j++) {
+          const b = stars[j];
+          const dx = s.x - b.x;
+          const dy = s.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 150) {
+            const lineAlpha = (1 - dist / 150) * 0.3;
+            const grad = ctx.createLinearGradient(s.x, s.y, b.x, b.y);
+            grad.addColorStop(0, s.color + Math.round(lineAlpha * 255).toString(16).padStart(2, "0"));
+            grad.addColorStop(1, b.color + Math.round(lineAlpha * 255).toString(16).padStart(2, "0"));
+            ctx.beginPath();
+            ctx.moveTo(s.x, s.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+          }
+        }
+      });
+    }
+
+    // ── PARTICLES ──
     function initParticles() {
       particles.length = 0;
       for (let i = 0; i < PARTICLE_COUNT; i++) {
@@ -70,104 +226,6 @@ function BackgroundCanvas() {
       });
     }
 
-    const auroraWaves = [
-      { color: "#14b8a6", offset: 0, speed: 0.0001,  amp: 80, base: 0.82 },
-      { color: "#6366f1", offset: 2, speed: 0.00008, amp: 60, base: 0.88 },
-      { color: "#a855f7", offset: 4, speed: 0.00012, amp: 70, base: 0.78 },
-      { color: "#ec4899", offset: 6, speed: 0.00009, amp: 50, base: 0.93 },
-    ];
-
-    let t = 0;
-
-    function drawAurora() {
-      auroraWaves.forEach((wave) => {
-        ctx.beginPath();
-        ctx.moveTo(0, H);
-
-        for (let x = 0; x <= W; x += 6) {
-          const y =
-            H * wave.base +
-            Math.sin((x / W) * Math.PI * 3 + t * wave.speed + wave.offset) * wave.amp +
-            Math.sin((x / W) * Math.PI * 5 + t * wave.speed * 0.7 + wave.offset * 1.5) * (wave.amp * 0.4);
-          ctx.lineTo(x, y);
-        }
-
-        ctx.lineTo(W, H);
-        ctx.closePath();
-
-        const grad = ctx.createLinearGradient(0, H * wave.base - wave.amp, 0, H);
-        grad.addColorStop(0, wave.color + "00");
-        grad.addColorStop(0.4, wave.color + "28");
-        grad.addColorStop(1, wave.color + "00");
-        ctx.fillStyle = grad;
-        ctx.fill();
-      });
-    }
-
-    function drawStars() {
-      stars.forEach((s, i) => {
-        s.x += s.vx;
-        s.y += s.vy;
-        if (s.x < 0) s.x = W;
-        if (s.x > W) s.x = 0;
-        if (s.y < 0) s.y = H;
-        if (s.y > H) s.y = 0;
-
-        const pulse = Math.sin(t * s.pulseSpeed + s.pulseOffset) * 0.5 + 1;
-        const r = s.r * pulse;
-
-        // Outer glow
-        const glow = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, r * 5);
-        glow.addColorStop(0, s.color + "66");
-        glow.addColorStop(1, s.color + "00");
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, r * 5, 0, Math.PI * 2);
-        ctx.fillStyle = glow;
-        ctx.fill();
-
-        // Core dot
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, r, 0, Math.PI * 2);
-        ctx.fillStyle = s.color + Math.round(s.alpha * 255).toString(16).padStart(2, "0");
-        ctx.fill();
-
-        // Cross sparkle on bigger stars
-        if (s.r > 2.5) {
-          ctx.save();
-          ctx.globalAlpha = s.alpha * 0.5;
-          ctx.strokeStyle = s.color;
-          ctx.lineWidth = 0.8;
-          ctx.beginPath();
-          ctx.moveTo(s.x - r * 3, s.y);
-          ctx.lineTo(s.x + r * 3, s.y);
-          ctx.moveTo(s.x, s.y - r * 3);
-          ctx.lineTo(s.x, s.y + r * 3);
-          ctx.stroke();
-          ctx.restore();
-        }
-
-        // Constellation lines
-        for (let j = i + 1; j < stars.length; j++) {
-          const b = stars[j];
-          const dx = s.x - b.x;
-          const dy = s.y - b.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 150) {
-            const lineAlpha = (1 - dist / 150) * 0.35;
-            const grad = ctx.createLinearGradient(s.x, s.y, b.x, b.y);
-            grad.addColorStop(0, s.color + Math.round(lineAlpha * 255).toString(16).padStart(2, "0"));
-            grad.addColorStop(1, b.color + Math.round(lineAlpha * 255).toString(16).padStart(2, "0"));
-            ctx.beginPath();
-            ctx.moveTo(s.x, s.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = grad;
-            ctx.lineWidth = 1;
-            ctx.stroke();
-          }
-        }
-      });
-    }
-
     function drawParticles() {
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
@@ -186,7 +244,6 @@ function BackgroundCanvas() {
         ctx.fillStyle = p.color + Math.round(p.life * p.alpha * 255).toString(16).padStart(2, "0");
         ctx.fill();
 
-        // Glow
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r * 2.5, 0, Math.PI * 2);
         ctx.fillStyle = p.color + Math.round(p.life * p.alpha * 0.3 * 255).toString(16).padStart(2, "0");
@@ -194,22 +251,25 @@ function BackgroundCanvas() {
       }
     }
 
+    // ── LOOP ──
     function loop(timestamp) {
       t = timestamp;
       ctx.clearRect(0, 0, W, H);
-      drawAurora();
+      drawBlobs();
       drawStars();
       drawParticles();
       animId = requestAnimationFrame(loop);
     }
 
     resize();
+    initBlobs();
     initStars();
     initParticles();
     animId = requestAnimationFrame(loop);
 
     window.addEventListener("resize", () => {
       resize();
+      initBlobs();
       initStars();
     });
 
@@ -227,7 +287,7 @@ function BackgroundCanvas() {
         inset: 0,
         zIndex: 0,
         pointerEvents: "none",
-        opacity: 0.55,
+        opacity: 0.65,
       }}
     />
   );
