@@ -4,6 +4,208 @@ import Loading from "@/components/Loading";
 import Error from "@/components/Error";
 import { useUserDetailsStore } from "@/hooks/useUserDetailsStore";
 import Header from "@/components/Header";
+import { useEffect, useRef } from "react";
+
+function BackgroundCanvas() {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    let animId;
+    let W, H;
+
+    const COLORS = ["#14b8a6", "#6366f1", "#a855f7", "#f59e0b", "#ec4899"];
+
+    // -- STARS / CONSTELLATION --
+    const STAR_COUNT = 80;
+    const stars = [];
+
+    // -- PARTICLES --
+    const PARTICLE_COUNT = 40;
+    const particles = [];
+
+    function resize() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+
+    function randomColor() {
+      return COLORS[Math.floor(Math.random() * COLORS.length)];
+    }
+
+    function initStars() {
+      stars.length = 0;
+      for (let i = 0; i < STAR_COUNT; i++) {
+        stars.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
+          r: Math.random() * 1.5 + 0.5,
+          color: randomColor(),
+          alpha: Math.random() * 0.5 + 0.3,
+        });
+      }
+    }
+
+    function initParticles() {
+      particles.length = 0;
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        spawnParticle(true);
+      }
+    }
+
+    function spawnParticle(random = false) {
+      particles.push({
+        x: Math.random() * W,
+        y: random ? Math.random() * H : H + 10,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: -(Math.random() * 0.6 + 0.3),
+        r: Math.random() * 2 + 1,
+        color: randomColor(),
+        alpha: Math.random() * 0.6 + 0.2,
+        life: 1,
+        decay: Math.random() * 0.003 + 0.001,
+      });
+    }
+
+    // Aurora wave config
+    const auroraWaves = [
+      { color: "#14b8a6", offset: 0,   speed: 0.0008, amp: 80,  base: 0.82 },
+      { color: "#6366f1", offset: 2,   speed: 0.0006, amp: 60,  base: 0.88 },
+      { color: "#a855f7", offset: 4,   speed: 0.0010, amp: 70,  base: 0.78 },
+      { color: "#ec4899", offset: 6,   speed: 0.0007, amp: 50,  base: 0.93 },
+    ];
+
+    let t = 0;
+
+    function drawAurora() {
+      auroraWaves.forEach((wave) => {
+        ctx.beginPath();
+        ctx.moveTo(0, H);
+
+        for (let x = 0; x <= W; x += 6) {
+          const y =
+            H * wave.base +
+            Math.sin((x / W) * Math.PI * 3 + t * wave.speed * 1000 + wave.offset) * wave.amp +
+            Math.sin((x / W) * Math.PI * 5 + t * wave.speed * 800 + wave.offset * 1.5) * (wave.amp * 0.4);
+          ctx.lineTo(x, y);
+        }
+
+        ctx.lineTo(W, H);
+        ctx.closePath();
+
+        const grad = ctx.createLinearGradient(0, H * wave.base - wave.amp, 0, H);
+        grad.addColorStop(0, wave.color + "00");
+        grad.addColorStop(0.4, wave.color + "28");
+        grad.addColorStop(1, wave.color + "00");
+        ctx.fillStyle = grad;
+        ctx.fill();
+      });
+    }
+
+    function drawStars() {
+      stars.forEach((s, i) => {
+        // Move
+        s.x += s.vx;
+        s.y += s.vy;
+        if (s.x < 0) s.x = W;
+        if (s.x > W) s.x = 0;
+        if (s.y < 0) s.y = H;
+        if (s.y > H) s.y = 0;
+
+        // Draw dot
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = s.color + Math.round(s.alpha * 255).toString(16).padStart(2, "0");
+        ctx.fill();
+
+        // Draw connections
+        for (let j = i + 1; j < stars.length; j++) {
+          const b = stars[j];
+          const dx = s.x - b.x;
+          const dy = s.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 120) {
+            const lineAlpha = (1 - dist / 120) * 0.15;
+            ctx.beginPath();
+            ctx.moveTo(s.x, s.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.strokeStyle = `rgba(148,163,184,${lineAlpha})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      });
+    }
+
+    function drawParticles() {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= p.decay;
+
+        if (p.life <= 0 || p.y < -10) {
+          particles.splice(i, 1);
+          spawnParticle();
+          continue;
+        }
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.color + Math.round(p.life * p.alpha * 255).toString(16).padStart(2, "0");
+        ctx.fill();
+
+        // Glow
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r * 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = p.color + Math.round(p.life * p.alpha * 0.3 * 255).toString(16).padStart(2, "0");
+        ctx.fill();
+      }
+    }
+
+    function loop(timestamp) {
+      t = timestamp;
+      ctx.clearRect(0, 0, W, H);
+
+      drawAurora();
+      drawStars();
+      drawParticles();
+
+      animId = requestAnimationFrame(loop);
+    }
+
+    resize();
+    initStars();
+    initParticles();
+    animId = requestAnimationFrame(loop);
+
+    window.addEventListener("resize", () => {
+      resize();
+      initStars();
+    });
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 0,
+        pointerEvents: "none",
+        opacity: 0.55,
+      }}
+    />
+  );
+}
 
 export default function PublicLayout() {
   const { isError, isLoading, error } = useUserDetailsStore();
@@ -19,118 +221,11 @@ export default function PublicLayout() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background">
-
-      {/* Grid — subtle, doesn't compete with text */}
-      <div
-        className="pointer-events-none fixed inset-0"
-        style={{
-          zIndex: 0,
-          backgroundImage: `
-            linear-gradient(rgba(20, 184, 166, 0.06) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(20, 184, 166, 0.06) 1px, transparent 1px)
-          `,
-          backgroundSize: "48px 48px",
-        }}
-      />
-
-      {/* Orbs — pushed to corners, low opacity so text stays readable */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden" style={{ zIndex: 0 }}>
-
-        {/* Teal — top left corner */}
-        <div
-          style={{
-            position: "absolute",
-            width: "600px",
-            height: "600px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, #14b8a6 0%, transparent 65%)",
-            opacity: 0.18,
-            top: "-200px",
-            left: "-200px",
-            animation: "drift1 8s ease-in-out infinite alternate",
-          }}
-        />
-
-        {/* Indigo — bottom right corner */}
-        <div
-          style={{
-            position: "absolute",
-            width: "600px",
-            height: "600px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, #6366f1 0%, transparent 65%)",
-            opacity: 0.18,
-            bottom: "-200px",
-            right: "-200px",
-            animation: "drift2 10s ease-in-out infinite alternate",
-          }}
-        />
-
-        {/* Amber — top right */}
-        <div
-          style={{
-            position: "absolute",
-            width: "400px",
-            height: "400px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, #f59e0b 0%, transparent 65%)",
-            opacity: 0.12,
-            top: "-100px",
-            right: "-100px",
-            animation: "drift3 12s ease-in-out infinite alternate",
-          }}
-        />
-
-        {/* Purple — bottom left */}
-        <div
-          style={{
-            position: "absolute",
-            width: "400px",
-            height: "400px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, #a855f7 0%, transparent 65%)",
-            opacity: 0.12,
-            bottom: "-100px",
-            left: "-100px",
-            animation: "drift4 14s ease-in-out infinite alternate",
-          }}
-        />
-      </div>
-
-      {/* Dark overlay in the CENTER so text in the middle is always readable */}
-      <div
-        className="pointer-events-none fixed inset-0"
-        style={{
-          zIndex: 0,
-          background: "radial-gradient(ellipse at center, hsl(var(--background) / 0.55) 0%, transparent 70%)",
-        }}
-      />
-
-      <style>{`
-        @keyframes drift1 {
-          0%   { transform: translate(0px, 0px) scale(1); }
-          100% { transform: translate(60px, 80px) scale(1.15); }
-        }
-        @keyframes drift2 {
-          0%   { transform: translate(0px, 0px) scale(1); }
-          100% { transform: translate(-60px, -80px) scale(1.15); }
-        }
-        @keyframes drift3 {
-          0%   { transform: translate(0px, 0px) scale(1); }
-          100% { transform: translate(-50px, 60px) scale(1.1); }
-        }
-        @keyframes drift4 {
-          0%   { transform: translate(0px, 0px) scale(1); }
-          100% { transform: translate(50px, -60px) scale(1.1); }
-        }
-      `}</style>
-
-      {/* Content */}
+      <BackgroundCanvas />
       <div className="relative" style={{ zIndex: 1 }}>
         <Header />
         <Outlet />
       </div>
-
     </div>
   );
 }
