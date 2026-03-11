@@ -62,7 +62,7 @@ function ContactPage() {
   ].filter((s) => s.url);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
+    <main className="relative min-h-screen overflow-hidden text-foreground">
 
       {/* Background blobs */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
