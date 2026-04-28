@@ -17,8 +17,7 @@ function HomePage() {
 
   return (
     <main className="relative min-h-screen overflow-hidden text-foreground">
-      <section className="max-w-6xl mx-auto min-h-screen px-6 md:px-12 lg:px-20 flex flex-col-reverse items-center justify-center gap-14 lg:flex-row lg:gap-20">
-
+      <section className="max-w-6xl mx-auto min-h-screen px-6 md:px-12 lg:px-20 flex flex-col-reverse items-center justify-center gap-14 lg:flex-row lg:gap-20 mt-20 lg:mt-0">
         <div className="flex flex-col items-center lg:items-start gap-6 text-center lg:text-left max-w-xl w-full">
           {data.availableForWork && (
             <motion.div {...fadeUp(0)}>
