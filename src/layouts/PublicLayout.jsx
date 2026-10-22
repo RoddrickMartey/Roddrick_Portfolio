@@ -4,7 +4,7 @@ import Loading from "@/components/Loading";
 import Error from "@/components/Error";
 import { useUserDetailsStore } from "@/hooks/useUserDetailsStore";
 import Header from "@/components/Header";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function BackgroundCanvas() {
   const canvasRef = useRef(null);
@@ -284,7 +284,53 @@ function BackgroundCanvas() {
   );
 }
 
-export default function PublicLayout() {
+const NEW_PORTFOLIO_URL = "https://roddrick-martey-portfolio.vercel.app";
+const REDIRECT_DELAY_SECONDS = 5;
+
+function RedirectNotice() {
+  const [seconds, setSeconds] = useState(REDIRECT_DELAY_SECONDS);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setSeconds((s) => s - 1);
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    if (seconds <= 0) window.location.replace(NEW_PORTFOLIO_URL);
+  }, [seconds]);
+
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-background">
+      <BackgroundCanvas />
+      <div
+        className="relative flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center"
+        style={{ zIndex: 1 }}
+      >
+        <span className="rounded-full border border-border px-3 py-1 text-xs font-medium uppercase tracking-widest">
+          Version 2
+        </span>
+        <h1 className="text-3xl font-bold sm:text-4xl">
+          My portfolio has a new home
+        </h1>
+        <p className="max-w-md text-muted-foreground">
+          Taking you to the new portfolio in {Math.max(seconds, 0)}s...
+        </p>
+        <a
+          href={NEW_PORTFOLIO_URL}
+          className="rounded-xl border border-border px-5 py-2 text-sm font-medium transition-colors hover:bg-foreground hover:text-background"
+        >
+          Go now
+        </a>
+      </div>
+    </div>
+  );
+}
+
+// Previous layout, kept for rollback. Not rendered while the redirect is active.
+// eslint-disable-next-line no-unused-vars
+function LegacyPublicLayout() {
   const { isError, isLoading, error } = useUserDetailsStore();
 
   if (isLoading) return <Loading />;
@@ -305,4 +351,8 @@ export default function PublicLayout() {
       </div>
     </div>
   );
+}
+
+export default function PublicLayout() {
+  return <RedirectNotice />;
 }
